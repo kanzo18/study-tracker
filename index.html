@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学習継続トラッカー</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f8f7f5;
+            color: #2c2c2c;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #a8d5ba;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+            color: #1a1a1a;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .tab-button {
+            padding: 12px 20px;
+            border: none;
+            background-color: #e8e6e1;
+            color: #666;
+            cursor: pointer;
+            border-radius: 8px;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .tab-button:hover {
+            background-color: #ddd;
+        }
+
+        .tab-button.active {
+            background-color: #7ea8a8;
+            color: #fff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background-color: #fafafa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e8e6e1;
+        }
+
+        .card h2 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input[type="number"],
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            color: #333;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input[type="number"]:focus,
+        .form-group input[type="text"]:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #7ea8a8;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .condition-selector {
+            display: flex;
+            gap: 10px;
+        }
+
+        .condition-button {
+            flex: 1;
+            padding: 12px;
+            background-color: #f0ede9;
+            border: 2px solid #d0ccc8;
+            border-radius: 8px;
+            color: #666;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .condition-button:hover {
+            border-color: #7ea8a8;
+            color: #2c2c2c;
+        }
+
+        .condition-button.selected {
+            background-color: #7ea8a8;
+            border-color: #7ea8a8;
+            color: #fff;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: #7ea8a8;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background-color: #6a8f8f;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background-color: #e8e6e1;
+            color: #555;
+        }
+
+        .btn-secondary:hover {
+            background-color: #ddd;
+            color: #2c2c2c;
+        }
+
+        .info-section {
+            background-color: #f0ede9;
+            border-left: 3px solid #7ea8a8;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #666;
+            margin-top: 15px;
+        }
+
+        .success-message {
+            background-color: #e8f5f1;
+            border-left: 3px solid #a8d5ba;
+            padding: 12px;
+            border-radius: 4px;
+            color: #3d6b64;
+            font-size: 14px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #ddd;
+            margin: 20px 0;
+        }
+
+        /* カレンダースタイル */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-header h3 {
+            font-size: 18px;
+            color: #1a1a1a;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .calendar-nav button {
+            padding: 8px 12px;
+            background-color: #e8e6e1;
+            border: none;
+            border-radius: 6px;
+            color: #555;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-nav button:hover {
+            background-color: #7ea8a8;
+            color: #fff;
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .calendar-weekday {
+            text-align: center;
+            font-weight: 600;
+            color: #7ea8a8;
+            font-size: 12px;
+            padding: 8px 0;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #fafafa;
+            border: 1px solid #e8e6e1;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            color: #333;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            border-color: #7ea8a8;
+            transform: scale(1.05);
+        }
+
+        .calendar-day.other-month {
+            color: #bbb;
+            background-color: #f0ede9;
+            cursor: default;
+        }
+
+        .calendar-day.other-month:hover {
+            transform: none;
+            border-color: #e8e6e1;
+        }
+
+        .calendar-day.has-record {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .calendar-day.heat-1 {
+            background-color: #deeaea;
+        }
+
+        .calendar-day.heat-2 {
+            background-color: #bbd9d9;
+        }
+
+        .calendar-day.heat-3 {
+            background-color: #7ea8a8;
+            color: #fff;
+        }
+
+        .calendar-day.heat-4 {
+            background-color: #5a7f7f;
+            color: #fff;
+        }
+
+        .calendar-day.heat-5 {
+            background-color: #3d5555;
+            color: #fff;
+        }
+
+        /* ポップアップスタイル */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background-color: #fafafa;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e8e6e1;
+            padding-bottom: 15px;
+        }
+
+        .modal-header h2 {
+            font-size: 18px;
+            color: #1a1a1a;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: #7ea8a8;
+        }
+
+        .modal-body {
+            color: #333;
+        }
+
+        .modal-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-row:last-child {
+            border-bottom: none;
+        }
+
+        .modal-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .modal-value {
+            color: #333;
+        }
+
+        .no-record {
+            text-align: center;
+            color: #999;
+            padding: 20px 0;
+            font-size: 14px;
+        }
+
+        .heatmap-legend {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e8e6e1;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        /* 統計スタイル */
+        .stats-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background-color: #f0ede9;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid #e8e6e1;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #7ea8a8;
+            margin: 0;
+        }
+
+        .stat-value.large {
+            font-size: 48px;
+        }
+
+        .stat-subtext {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .streak-card {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #7ea8a8 0%, #5a7f7f 100%);
+            color: #fff;
+            padding: 30px;
+        }
+
+        .streak-card .stat-label {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .streak-card .stat-value {
+            color: #fff;
+            font-size: 64px;
+        }
+
+        .streak-card .stat-subtext {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .badges-section {
+            background-color: #f0ede9;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .badges-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+        }
+
+        .badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            background-color: #fff;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            text-align: center;
+            cursor: default;
+            transition: all 0.3s ease;
+        }
+
+        .badge.locked {
+            opacity: 0.5;
+            filter: grayscale(100%);
+        }
+
+        .badge.unlocked {
+            border-color: #a8d5ba;
+            background-color: #fafafa;
+        }
+
+        .badge.unlocked:hover {
+            border-color: #7ea8a8;
+            transform: scale(1.05);
+        }
+
+        .badge-icon {
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+
+        .badge-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .badge-description {
+            font-size: 10px;
+            color: #999;
+            margin-top: 3px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .streak-card {
+                grid-column: 1;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+                max-width: 100%;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .condition-button {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 学習継続トラッカー</h1>
+            <p>毎日の学習を記録して、継続力を育てよう</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" data-tab="today">今日の記録</button>
+            <button class="tab-button" data-tab="calendar">カレンダー</button>
+            <button class="tab-button" data-tab="stats">統計</button>
+        </div>
+
+        <!-- タブ1：今日の記録 -->
+        <div id="today" class="tab-content active">
+            <div id="successMessage" class="success-message"></div>
+
+            <!-- 目標設定 -->
+            <div class="card">
+                <h2>🎯 今日の目標</h2>
+                <div class="form-group">
+                    <label for="dailyGoalQuestions">目標解問数（問）</label>
+                    <input type="number" id="dailyGoalQuestions" placeholder="例: 10" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="dailyGoalMinutes">目標学習時間（分）</label>
+                    <input type="number" id="dailyGoalMinutes" placeholder="例: 60" min="0">
+                </div>
+                <button class="btn btn-secondary" onclick="app.saveGoals()">目標を保存</button>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- 学習記録 -->
+            <div class="card">
+                <h2>📝 今日の学習記録</h2>
+
+                <div class="form-group">
+                    <label for="todayQuestions">解いた問題数（問）</label>
+                    <input type="number" id="todayQuestions" placeholder="0" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="todayMinutes">講義視聴時間（分）</label>
+                    <input type="number" id="todayMinutes" placeholder="0" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label>今日のコンディション</label>
+                    <div class="condition-selector">
+                        <button class="condition-button" data-condition="1" onclick="app.selectCondition(1)">😢<br>1</button>
+                        <button class="condition-button" data-condition="2" onclick="app.selectCondition(2)">😐<br>2</button>
+                        <button class="condition-button" data-condition="3" onclick="app.selectCondition(3)">😊<br>3</button>
+                        <button class="condition-button" data-condition="4" onclick="app.selectCondition(4)">😄<br>4</button>
+                        <button class="condition-button" data-condition="5" onclick="app.selectCondition(5)">🤩<br>5</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="todayMemo">一言メモ</label>
+                    <textarea id="todayMemo" placeholder="今日の学習について思ったことを書いてください（任意）"></textarea>
+                </div>
+
+                <div class="info-section">
+                    <strong>💡 ヒント:</strong> 毎日同じ時間に記録することで、習慣化しやすくなります。
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="app.saveRecord()">記録する</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- タブ2：カレンダー -->
+        <div id="calendar" class="tab-content">
+            <div class="card">
+                <div class="calendar-header">
+                    <h2 style="margin: 0;">📅 カレンダー</h2>
+                    <div class="calendar-nav">
+                        <button onclick="app.prevMonth()">← 前月</button>
+                        <button onclick="app.nextMonth()">次月 →</button>
+                    </div>
+                </div>
+
+                <div id="calendarMonthYear" style="text-align: center; font-weight: 600; color: #555; margin-bottom: 20px; font-size: 16px;"></div>
+
+                <div class="calendar-weekdays">
+                    <div class="calendar-weekday">日</div>
+                    <div class="calendar-weekday">月</div>
+                    <div class="calendar-weekday">火</div>
+                    <div class="calendar-weekday">水</div>
+                    <div class="calendar-weekday">木</div>
+                    <div class="calendar-weekday">金</div>
+                    <div class="calendar-weekday">土</div>
+                </div>
+
+                <div id="calendarGrid" class="calendar-grid"></div>
+
+                <div class="heatmap-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #fafafa;"></div>
+                        <span>記録なし</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #deeaea;"></div>
+                        <span>少</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #bbd9d9;"></div>
+                        <span>中</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #7ea8a8;"></div>
+                        <span>多</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #3d5555;"></div>
+                        <span>非常に多</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- タブ3：統計 -->
+        <div id="stats" class="tab-content">
+            <!-- ストリーク -->
+            <div class="card">
+                <div class="stats-container">
+                    <div class="streak-card">
+                        <div class="stat-label">📈 連続学習日数</div>
+                        <p class="stat-value large" id="streakDays">0</p>
+                        <div class="stat-subtext" id="streakDate">まだ学習記録がありません</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 統計情報 -->
+            <div class="card">
+                <h2>📊 学習統計</h2>
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-label">累計問題数</div>
+                        <p class="stat-value" id="totalQuestions">0</p>
+                        <div class="stat-subtext">問</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">累計学習時間</div>
+                        <p class="stat-value" id="totalMinutes">0</p>
+                        <div class="stat-subtext">時間</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">今月学習日数</div>
+                        <p class="stat-value" id="thisMonthDays">0</p>
+                        <div class="stat-subtext">日</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">平均コンディション</div>
+                        <p class="stat-value" id="avgCondition">-</p>
+                        <div class="stat-subtext">/5.0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- バッジ -->
+            <div class="card">
+                <div class="badges-title">🏆 獲得バッジ</div>
+                <div class="badges-grid" id="badgesContainer">
+                    <!-- バッジが動的に挿入される -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ポップアップモーダル -->
+    <div id="recordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalDate"></h2>
+                <button class="modal-close" onclick="app.closeModal()">✕</button>
+            </div>
+            <div id="modalBody" class="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        const app = {
+            currentCondition: null,
+            currentMonth: new Date().getMonth(),
+            currentYear: new Date().getFullYear(),
+
+            // 初期化
+            init() {
+                this.setupTabSwitching();
+                this.loadGoals();
+                this.loadTodayRecord();
+                this.renderCalendar();
+                this.updateStats();
+                // タブ切り替え時にもカレンダーをレンダリング
+                document.querySelector('[data-tab="calendar"]').addEventListener('click', () => {
+                    setTimeout(() => this.renderCalendar(), 0);
+                });
+                // 統計タブをクリック時に更新
+                document.querySelector('[data-tab="stats"]').addEventListener('click', () => {
+                    this.updateStats();
+                });
+            },
+
+            // タブ切り替え
+            setupTabSwitching() {
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const tabName = e.target.dataset.tab;
+                        this.switchTab(tabName);
+                    });
+                });
+
+                // モーダルの背景クリックで閉じる
+                document.getElementById('recordModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'recordModal') {
+                        this.closeModal();
+                    }
+                });
+            },
+
+            switchTab(tabName) {
+                // すべてのタブとボタンを非表示/非アクティブにする
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                // 選択されたタブを表示/アクティブにする
+                document.getElementById(tabName).classList.add('active');
+                document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            },
+
+            // 目標の保存
+            saveGoals() {
+                const questions = document.getElementById('dailyGoalQuestions').value;
+                const minutes = document.getElementById('dailyGoalMinutes').value;
+
+                if (questions === '' && minutes === '') {
+                    this.showMessage('少なくとも1つの目標を入力してください', false);
+                    return;
+                }
+
+                const settings = {
+                    dailyGoalQuestions: parseInt(questions) || 0,
+                    dailyGoalMinutes: parseInt(minutes) || 0
+                };
+
+                localStorage.setItem('settings', JSON.stringify(settings));
+                this.showMessage('目標を保存しました！');
+            },
+
+            // 目標の読み込み
+            loadGoals() {
+                const settings = JSON.parse(localStorage.getItem('settings')) || {
+                    dailyGoalQuestions: 0,
+                    dailyGoalMinutes: 0
+                };
+
+                document.getElementById('dailyGoalQuestions').value = settings.dailyGoalQuestions;
+                document.getElementById('dailyGoalMinutes').value = settings.dailyGoalMinutes;
+            },
+
+            // コンディション選択
+            selectCondition(condition) {
+                this.currentCondition = condition;
+                document.querySelectorAll('.condition-button').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                document.querySelector(`[data-condition="${condition}"]`).classList.add('selected');
+            },
+
+            // 今日の日付を取得（YYYY-MM-DD形式）
+            getTodayDate() {
+                const today = new Date();
+                return today.toISOString().split('T')[0];
+            },
+
+            // 記録の保存
+            saveRecord() {
+                const questions = document.getElementById('todayQuestions').value;
+                const minutes = document.getElementById('todayMinutes').value;
+                const memo = document.getElementById('todayMemo').value;
+
+                if (questions === '' && minutes === '') {
+                    this.showMessage('問題数または学習時間を入力してください', false);
+                    return;
+                }
+
+                if (this.currentCondition === null) {
+                    this.showMessage('コンディションを選択してください', false);
+                    return;
+                }
+
+                const record = {
+                    questions: parseInt(questions) || 0,
+                    minutes: parseInt(minutes) || 0,
+                    condition: this.currentCondition,
+                    memo: memo,
+                    timestamp: new Date().toISOString()
+                };
+
+                const recordKey = 'record_' + this.getTodayDate();
+                localStorage.setItem(recordKey, JSON.stringify(record));
+
+                this.showMessage('今日の学習を記録しました！🎉');
+                this.clearForm();
+            },
+
+            // 今日の記録を読み込み
+            loadTodayRecord() {
+                const recordKey = 'record_' + this.getTodayDate();
+                const record = JSON.parse(localStorage.getItem(recordKey));
+
+                if (record) {
+                    document.getElementById('todayQuestions').value = record.questions;
+                    document.getElementById('todayMinutes').value = record.minutes;
+                    document.getElementById('todayMemo').value = record.memo;
+                    this.selectCondition(record.condition);
+                }
+            },
+
+            // フォームをクリア
+            clearForm() {
+                document.getElementById('todayQuestions').value = '';
+                document.getElementById('todayMinutes').value = '';
+                document.getElementById('todayMemo').value = '';
+                this.currentCondition = null;
+                document.querySelectorAll('.condition-button').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+            },
+
+            // メッセージ表示
+            showMessage(message, isSuccess = true) {
+                const messageEl = document.getElementById('successMessage');
+                messageEl.textContent = message;
+                messageEl.classList.add('show');
+
+                if (isSuccess) {
+                    messageEl.style.background = '#e8f5f1';
+                    messageEl.style.borderLeftColor = '#a8d5ba';
+                    messageEl.style.color = '#3d6b64';
+                } else {
+                    messageEl.style.background = '#fce8e6';
+                    messageEl.style.borderLeftColor = '#d9a19a';
+                    messageEl.style.color = '#6b3533';
+                }
+
+                setTimeout(() => {
+                    messageEl.classList.remove('show');
+                }, 3000);
+            },
+
+            // カレンダーのレンダリング
+            renderCalendar() {
+                const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+                const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
+                const daysInMonth = lastDay.getDate();
+                const startingDayOfWeek = firstDay.getDay();
+
+                // 月年表示を更新
+                const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+                document.getElementById('calendarMonthYear').textContent = `${this.currentYear}年 ${monthNames[this.currentMonth]}`;
+
+                // グリッドをクリア
+                const grid = document.getElementById('calendarGrid');
+                grid.innerHTML = '';
+
+                // 前月の日付を灰色で表示
+                const prevMonthDays = new Date(this.currentYear, this.currentMonth, 0).getDate();
+                for (let i = startingDayOfWeek - 1; i >= 0; i--) {
+                    const dayEl = document.createElement('div');
+                    dayEl.className = 'calendar-day other-month';
+                    dayEl.textContent = prevMonthDays - i;
+                    grid.appendChild(dayEl);
+                }
+
+                // 当月の日付を表示
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayEl = document.createElement('div');
+                    dayEl.className = 'calendar-day';
+                    dayEl.textContent = day;
+
+                    const dateStr = this.formatDate(this.currentYear, this.currentMonth, day);
+                    const record = JSON.parse(localStorage.getItem('record_' + dateStr));
+
+                    if (record) {
+                        dayEl.classList.add('has-record');
+                        // ヒートマップ：学習量に応じて色を変える
+                        const totalScore = record.questions + (record.minutes / 10);
+                        if (totalScore >= 30) {
+                            dayEl.classList.add('heat-5');
+                        } else if (totalScore >= 20) {
+                            dayEl.classList.add('heat-4');
+                        } else if (totalScore >= 10) {
+                            dayEl.classList.add('heat-3');
+                        } else if (totalScore >= 5) {
+                            dayEl.classList.add('heat-2');
+                        } else {
+                            dayEl.classList.add('heat-1');
+                        }
+                    }
+
+                    dayEl.addEventListener('click', () => {
+                        if (record) {
+                            this.showRecordModal(dateStr, record);
+                        }
+                    });
+
+                    grid.appendChild(dayEl);
+                }
+
+                // 翌月の日付を灰色で表示
+                const totalCells = grid.children.length;
+                const remainingCells = 42 - totalCells; // 6行 x 7列 = 42
+                for (let i = 1; i <= remainingCells; i++) {
+                    const dayEl = document.createElement('div');
+                    dayEl.className = 'calendar-day other-month';
+                    dayEl.textContent = i;
+                    grid.appendChild(dayEl);
+                }
+            },
+
+            // 前月へ
+            prevMonth() {
+                this.currentMonth--;
+                if (this.currentMonth < 0) {
+                    this.currentMonth = 11;
+                    this.currentYear--;
+                }
+                this.renderCalendar();
+            },
+
+            // 次月へ
+            nextMonth() {
+                this.currentMonth++;
+                if (this.currentMonth > 11) {
+                    this.currentMonth = 0;
+                    this.currentYear++;
+                }
+                this.renderCalendar();
+            },
+
+            // 日付をフォーマット（YYYY-MM-DD形式）
+            formatDate(year, month, day) {
+                const m = String(month + 1).padStart(2, '0');
+                const d = String(day).padStart(2, '0');
+                return `${year}-${m}-${d}`;
+            },
+
+            // 記録ポップアップを表示
+            showRecordModal(dateStr, record) {
+                const modal = document.getElementById('recordModal');
+                const dateEl = document.getElementById('modalDate');
+                const bodyEl = document.getElementById('modalBody');
+
+                // 日付フォーマット
+                const [year, month, day] = dateStr.split('-');
+                const date = new Date(year, month - 1, day);
+                const dayName = ['日', '月', '火', '水', '木', '金', '土'][date.getDay()];
+                dateEl.textContent = `${year}年${month}月${day}日（${dayName}）`;
+
+                // 記録内容を表示
+                const conditionEmojis = ['', '😢', '😐', '😊', '😄', '🤩'];
+                bodyEl.innerHTML = `
+                    <div class="modal-row">
+                        <span class="modal-label">解いた問題数：</span>
+                        <span class="modal-value">${record.questions}問</span>
+                    </div>
+                    <div class="modal-row">
+                        <span class="modal-label">学習時間：</span>
+                        <span class="modal-value">${record.minutes}分</span>
+                    </div>
+                    <div class="modal-row">
+                        <span class="modal-label">コンディション：</span>
+                        <span class="modal-value">${conditionEmojis[record.condition]} ${record.condition}/5</span>
+                    </div>
+                    ${record.memo ? `<div class="modal-row">
+                        <span class="modal-label">メモ：</span>
+                        <span class="modal-value">${this.escapeHtml(record.memo)}</span>
+                    </div>` : ''}
+                `;
+
+                modal.classList.add('show');
+            },
+
+            // ポップアップを閉じる
+            closeModal() {
+                document.getElementById('recordModal').classList.remove('show');
+            },
+
+            // HTML特殊文字をエスケープ
+            escapeHtml(text) {
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                };
+                return text.replace(/[&<>"']/g, m => map[m]);
+            },
+
+            // 統計を更新
+            updateStats() {
+                this.updateStreak();
+                this.updateTotalStats();
+                this.updateBadges();
+            },
+
+            // ストリークを計算
+            updateStreak() {
+                let streak = 0;
+                let currentDate = new Date();
+                currentDate.setHours(0, 0, 0, 0);
+
+                while (true) {
+                    const dateStr = currentDate.toISOString().split('T')[0];
+                    const record = JSON.parse(localStorage.getItem('record_' + dateStr));
+
+                    if (record) {
+                        streak++;
+                        currentDate.setDate(currentDate.getDate() - 1);
+                    } else {
+                        break;
+                    }
+                }
+
+                document.getElementById('streakDays').textContent = streak;
+                if (streak > 0) {
+                    document.getElementById('streakDate').textContent = `${streak}日連続で学習中！`;
+                } else {
+                    document.getElementById('streakDate').textContent = 'まだ学習記録がありません';
+                }
+            },
+
+            // 累計統計を計算
+            updateTotalStats() {
+                let totalQuestions = 0;
+                let totalMinutes = 0;
+                let thisMonthDays = 0;
+                let totalCondition = 0;
+                let recordCount = 0;
+
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                const currentMonth = now.getMonth();
+
+                // localStorageのすべての記録を確認
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith('record_')) {
+                        const record = JSON.parse(localStorage.getItem(key));
+                        totalQuestions += record.questions || 0;
+                        totalMinutes += record.minutes || 0;
+                        totalCondition += record.condition || 0;
+                        recordCount++;
+
+                        // 今月の学習日数を計算
+                        const dateStr = key.replace('record_', '');
+                        const [year, month] = dateStr.split('-');
+                        if (parseInt(year) === currentYear && parseInt(month) === currentMonth + 1) {
+                            thisMonthDays++;
+                        }
+                    }
+                }
+
+                document.getElementById('totalQuestions').textContent = totalQuestions;
+                document.getElementById('totalMinutes').textContent = (totalMinutes / 60).toFixed(1);
+                document.getElementById('thisMonthDays').textContent = thisMonthDays;
+
+                if (recordCount > 0) {
+                    const avgCondition = (totalCondition / recordCount).toFixed(1);
+                    document.getElementById('avgCondition').textContent = avgCondition;
+                } else {
+                    document.getElementById('avgCondition').textContent = '-';
+                }
+            },
+
+            // バッジを更新
+            updateBadges() {
+                const badges = [
+                    {
+                        id: 'first',
+                        name: '初記録達成',
+                        icon: '🎯',
+                        description: '初めて記録を作成',
+                        condition: () => this.hasAnyRecord()
+                    },
+                    {
+                        id: 'streak7',
+                        name: '7日連続',
+                        icon: '🔥',
+                        description: '7日連続で学習',
+                        condition: () => this.getStreak() >= 7
+                    },
+                    {
+                        id: 'streak30',
+                        name: '30日連続',
+                        icon: '⭐',
+                        description: '30日連続で学習',
+                        condition: () => this.getStreak() >= 30
+                    },
+                    {
+                        id: 'questions100',
+                        name: '問題100問',
+                        icon: '💯',
+                        description: '累計100問解答',
+                        condition: () => this.getTotalQuestions() >= 100
+                    },
+                    {
+                        id: 'time10',
+                        name: '学習10時間',
+                        icon: '⏰',
+                        description: '累計10時間学習',
+                        condition: () => this.getTotalMinutes() >= 600
+                    }
+                ];
+
+                const container = document.getElementById('badgesContainer');
+                container.innerHTML = '';
+
+                badges.forEach(badge => {
+                    const isUnlocked = badge.condition();
+                    const badgeEl = document.createElement('div');
+                    badgeEl.className = `badge ${isUnlocked ? 'unlocked' : 'locked'}`;
+                    badgeEl.innerHTML = `
+                        <div class="badge-icon">${badge.icon}</div>
+                        <div class="badge-name">${badge.name}</div>
+                        <div class="badge-description">${badge.description}</div>
+                    `;
+                    container.appendChild(badgeEl);
+                });
+            },
+
+            // 記録が1つ以上あるか判定
+            hasAnyRecord() {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith('record_')) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+
+            // 現在のストリークを取得
+            getStreak() {
+                let streak = 0;
+                let currentDate = new Date();
+                currentDate.setHours(0, 0, 0, 0);
+
+                while (true) {
+                    const dateStr = currentDate.toISOString().split('T')[0];
+                    const record = JSON.parse(localStorage.getItem('record_' + dateStr));
+
+                    if (record) {
+                        streak++;
+                        currentDate.setDate(currentDate.getDate() - 1);
+                    } else {
+                        break;
+                    }
+                }
+                return streak;
+            },
+
+            // 累計問題数を取得
+            getTotalQuestions() {
+                let total = 0;
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith('record_')) {
+                        const record = JSON.parse(localStorage.getItem(key));
+                        total += record.questions || 0;
+                    }
+                }
+                return total;
+            },
+
+            // 累計学習時間（分）を取得
+            getTotalMinutes() {
+                let total = 0;
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith('record_')) {
+                        const record = JSON.parse(localStorage.getItem(key));
+                        total += record.minutes || 0;
+                    }
+                }
+                return total;
+            }
+
+        // ページ読み込み時に初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+    </script>
+</body>
+</html>
+
