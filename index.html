@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Streak Master - 学習の継続をサポート</title>
     <style>
+        :root {
+            /* 木々を感じるナチュラルモダンなカラーパレット */
+            --primary: #4a7c59;      /* 深みのある緑 */
+            --primary-hover: #3d6649;
+            --primary-light: #e8eee9; /* 非常に薄い緑 */
+            --accent: #79a385;       /* 柔らかい中間の緑 */
+            --bg-color: #f5f7f5;     /* オフホワイト・微かな緑 */
+            --card-bg: #ffffff;
+            --text-main: #2c4c3b;
+            --text-muted: #6b7a72;
+            --border-color: #dce3dd;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,11 +25,12 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #1a1a1a;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             min-height: 100vh;
             padding: 20px;
+            line-height: 1.6;
         }
 
         .container {
@@ -28,160 +42,178 @@
             text-align: center;
             margin-bottom: 30px;
             padding: 40px 20px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-            backdrop-filter: blur(10px);
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(44, 76, 59, 0.05);
+            border: 1px solid var(--border-color);
         }
 
         .header h1 {
-            font-size: 36px;
+            font-size: 32px;
             margin-bottom: 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--primary);
             font-weight: 800;
-            letter-spacing: -1px;
+            letter-spacing: -0.5px;
         }
 
         .header p {
             font-size: 15px;
-            color: #666;
+            color: var(--text-muted);
             font-weight: 500;
         }
 
         .tabs {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             margin-bottom: 25px;
             overflow-x: auto;
-            padding: 0 5px;
+            padding: 5px;
         }
 
         .tab-btn {
-            padding: 14px 28px;
+            padding: 14px 24px;
             border: none;
-            background: rgba(255,255,255,0.8);
-            color: #667eea;
+            background: var(--card-bg);
+            color: var(--text-muted);
             cursor: pointer;
-            border-radius: 12px;
+            border-radius: 14px;
             white-space: nowrap;
             font-weight: 600;
-            transition: all 0.3s;
+            transition: all 0.2s ease;
             font-size: 15px;
-            backdrop-filter: blur(5px);
-            border: 2px solid transparent;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            border: 1px solid var(--border-color);
         }
 
         .tab-btn:hover {
-            background: rgba(255,255,255,0.95);
-            transform: translateY(-2px);
+            background: var(--primary-light);
+            color: var(--primary);
         }
 
         .tab-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--primary);
             color: #fff;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            border-color: var(--primary);
+            box-shadow: 0 8px 20px rgba(74, 124, 89, 0.25);
         }
 
         .tab-content {
             display: none;
+            animation: fadeIn 0.3s ease;
         }
 
         .tab-content.show {
             display: block;
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+            background: var(--card-bg);
             border-radius: 20px;
-            padding: 28px;
+            padding: 30px;
             margin-bottom: 20px;
-            border: none;
-            box-shadow: 0 15px 45px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(44, 76, 59, 0.03);
         }
 
         .card h2 {
             font-size: 18px;
             margin-bottom: 20px;
-            color: #1a1a1a;
+            color: var(--text-main);
             font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
             font-size: 14px;
             margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
+            color: var(--text-muted);
+            font-weight: 600;
         }
 
         .form-group input,
         .form-group textarea {
             width: 100%;
-            padding: 12px 16px;
-            background-color: #fff;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            color: #333;
+            padding: 14px 16px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-main);
             font-size: 15px;
             font-family: inherit;
-            transition: all 0.3s;
+            transition: all 0.2s ease;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
         }
 
         .form-group input:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: var(--primary);
+            background-color: #fff;
+            box-shadow: 0 0 0 4px var(--primary-light);
         }
 
         .condition-buttons {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         .condition-btn {
             flex: 1;
-            padding: 12px;
-            background-color: #f5f5f5;
-            border: 2px solid #e0e0e0;
+            padding: 12px 5px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
             cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s;
+            font-size: 18px;
+            transition: all 0.2s ease;
+        }
+
+        .condition-btn:hover {
+            background-color: var(--primary-light);
         }
 
         .condition-btn.selected {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-color: transparent;
+            background-color: var(--primary);
+            border-color: var(--primary);
             color: #fff;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(74, 124, 89, 0.2);
         }
 
         .btn {
-            padding: 14px;
+            padding: 16px;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             cursor: pointer;
             font-weight: 700;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: var(--primary);
             color: #fff;
             width: 100%;
             font-size: 16px;
-            transition: all 0.3s;
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            transition: all 0.2s ease;
+            box-shadow: 0 8px 20px rgba(74, 124, 89, 0.2);
         }
 
         .btn:hover {
+            background-color: var(--primary-hover);
             transform: translateY(-2px);
-            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 12px 25px rgba(74, 124, 89, 0.3);
         }
 
         .btn:active {
@@ -189,14 +221,15 @@
         }
 
         .message {
-            padding: 14px 18px;
-            border-radius: 10px;
-            margin-bottom: 15px;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
             display: none;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-            border-left: 4px solid #667eea;
-            color: #667eea;
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            color: var(--primary);
             font-weight: 600;
+            animation: fadeIn 0.3s ease;
         }
 
         .message.show {
@@ -207,37 +240,38 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .calendar-nav button {
-            padding: 10px 16px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.8) 100%);
-            border: 2px solid #667eea;
-            border-radius: 8px;
+            padding: 8px 16px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
             cursor: pointer;
             font-size: 13px;
             font-weight: 600;
-            color: #667eea;
-            transition: all 0.3s;
+            color: var(--text-main);
+            transition: all 0.2s;
         }
 
         .calendar-nav button:hover {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary);
         }
 
         .weekdays {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
+            gap: 6px;
             margin-bottom: 10px;
         }
 
         .weekday {
             text-align: center;
             font-weight: 600;
-            color: #7ea8a8;
+            color: var(--text-muted);
             font-size: 12px;
             padding: 8px 0;
         }
@@ -245,7 +279,7 @@
         .days-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
+            gap: 6px;
         }
 
         .day {
@@ -253,22 +287,35 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #fafafa;
-            border: 1px solid #e8e6e1;
-            border-radius: 8px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 12px;
-            font-weight: 500;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .day:hover:not(.other) {
+            border-color: var(--primary);
+            background-color: var(--primary-light);
         }
 
         .day.has-record {
-            background-color: #7ea8a8;
+            background-color: var(--accent);
+            border-color: var(--accent);
             color: #fff;
         }
 
+        .day.has-record:hover {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
         .day.other {
-            background-color: #f0ede9;
-            color: #bbb;
+            background-color: transparent;
+            border-color: transparent;
+            color: #ccc;
             cursor: default;
         }
 
@@ -280,94 +327,175 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.3);
+            background-color: rgba(44, 76, 59, 0.4);
+            backdrop-filter: blur(4px);
         }
 
         .modal.show {
             display: flex;
             align-items: center;
             justify-content: center;
+            animation: fadeIn 0.2s ease;
         }
 
         .modal-content {
-            background-color: #fafafa;
-            padding: 30px;
-            border-radius: 12px;
+            background-color: var(--card-bg);
+            padding: 35px;
+            border-radius: 20px;
             max-width: 400px;
             width: 90%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
         }
 
         .modal-close {
             float: right;
-            background: none;
+            background: var(--bg-color);
             border: none;
-            font-size: 24px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
             cursor: pointer;
-            color: #999;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .modal-content h3 {
+            margin-bottom: 20px;
+            color: var(--primary);
+            font-size: 18px;
+        }
+
+        .modal-content p {
+            margin-bottom: 12px;
+            font-size: 15px;
+            line-height: 1.6;
         }
 
         .stat-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 16px;
         }
 
         .stat-card {
-            background-color: #f0ede9;
-            padding: 20px;
-            border-radius: 12px;
+            background-color: var(--bg-color);
+            padding: 24px 20px;
+            border-radius: 16px;
             text-align: center;
+            border: 1px solid var(--border-color);
         }
 
         .stat-label {
-            font-size: 12px;
-            color: #666;
+            font-size: 13px;
+            color: var(--text-muted);
             font-weight: 600;
             margin-bottom: 8px;
         }
 
         .stat-value {
             font-size: 32px;
-            font-weight: 700;
-            color: #7ea8a8;
+            font-weight: 800;
+            color: var(--primary);
         }
 
         .badges {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(85px, 1fr));
+            gap: 12px;
         }
 
         .badge {
             padding: 15px;
-            background-color: #fff;
-            border: 2px solid #ddd;
-            border-radius: 12px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
             text-align: center;
+            transition: all 0.3s;
         }
 
         .badge.locked {
-            opacity: 0.5;
+            opacity: 0.4;
             filter: grayscale(100%);
+            background-color: transparent;
+            border-style: dashed;
         }
 
         .badge-icon {
-            font-size: 32px;
-            margin-bottom: 5px;
+            font-size: 28px;
+            margin-bottom: 8px;
         }
 
         .badge-name {
             font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        /* 木の成長機能用のスタイル */
+        .tree-card {
+            text-align: center;
+        }
+        
+        .tree-emoji {
+            font-size: 72px;
+            margin: 10px 0 20px;
+            display: inline-block;
+            transform-origin: bottom center;
+            animation: gentle-sway 4s ease-in-out infinite;
+            user-select: none;
+            filter: drop-shadow(0 10px 10px rgba(74, 124, 89, 0.2));
+        }
+
+        @keyframes gentle-sway {
+            0%, 100% { transform: rotate(-4deg); }
+            50% { transform: rotate(4deg); }
+        }
+
+        .tree-status {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .tree-progress-bar {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            height: 12px;
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .tree-progress {
+            background-color: var(--accent);
+            height: 100%;
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tree-next {
+            font-size: 13px;
+            color: var(--text-muted);
             font-weight: 600;
-            color: #555;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📚 学習継続トラッカー</h1>
-            <p>毎日の学習を記録して、継続力を育てよう</p>
+            <h1>🌿 Streak Master</h1>
+            <p>毎日の積み重ねが、大きな森をつくる</p>
         </div>
 
         <div class="tabs">
@@ -376,10 +504,23 @@
             <button class="tab-btn" onclick="switchTab(2)">統計</button>
         </div>
 
-        <!-- タブ1 -->
+        <!-- タブ1: 今日の記録 -->
         <div class="tab-content show">
             <div id="message" class="message"></div>
             
+            <!-- あなたの木セクション -->
+            <div class="card tree-card">
+                <h2>🌳 あなたの木</h2>
+                <div class="tree-display">
+                    <div id="treeEmoji" class="tree-emoji">🟫</div>
+                    <div id="treeStatus" class="tree-status">今日の記録をつけると種が蒔かれます</div>
+                </div>
+                <div class="tree-progress-bar">
+                    <div id="treeProgress" class="tree-progress"></div>
+                </div>
+                <div id="treeNext" class="tree-next">記録して種を蒔こう</div>
+            </div>
+
             <div class="card">
                 <h2>🎯 今日の目標</h2>
                 <div class="form-group">
@@ -390,11 +531,12 @@
                     <label>目標時間（分）</label>
                     <input type="number" id="goalM" min="0" placeholder="例: 60">
                 </div>
-                <button class="btn" onclick="saveGoals()">保存</button>
+                <button class="btn" onclick="saveGoals()">目標を保存</button>
             </div>
 
             <div class="card">
-                <h2>📝 今日の記録</h2>
+                <h2>✍️ 記録を追加する</h2>
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">同じ日に複数回記録すると、自動的に積み上げ加算されます。</p>
                 <div class="form-group">
                     <label>解いた問題数</label>
                     <input type="number" id="q" min="0" placeholder="0">
@@ -406,32 +548,32 @@
                 <div class="form-group">
                     <label>コンディション</label>
                     <div class="condition-buttons">
-                        <button class="condition-btn" onclick="setCondition(1)">😢 1</button>
-                        <button class="condition-btn" onclick="setCondition(2)">😐 2</button>
-                        <button class="condition-btn" onclick="setCondition(3)">😊 3</button>
-                        <button class="condition-btn" onclick="setCondition(4)">😄 4</button>
-                        <button class="condition-btn" onclick="setCondition(5)">🤩 5</button>
+                        <button class="condition-btn" onclick="setCondition(1)">😢</button>
+                        <button class="condition-btn" onclick="setCondition(2)">😐</button>
+                        <button class="condition-btn" onclick="setCondition(3)">😊</button>
+                        <button class="condition-btn" onclick="setCondition(4)">😄</button>
+                        <button class="condition-btn" onclick="setCondition(5)">🤩</button>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>メモ</label>
+                    <label>メモ (気づきや反省など)</label>
                     <textarea id="memo" placeholder="任意"></textarea>
                 </div>
-                <button class="btn" onclick="saveRecord()">記録する</button>
+                <button class="btn" onclick="saveRecord()">記録を積み上げる</button>
             </div>
         </div>
 
-        <!-- タブ2 -->
+        <!-- タブ2: カレンダー -->
         <div class="tab-content">
             <div class="card">
                 <div class="calendar-header">
-                    <h2>📅 カレンダー</h2>
+                    <h2>📅 記録カレンダー</h2>
                     <div>
                         <button class="calendar-nav" onclick="prevMonth()">← 前月</button>
                         <button class="calendar-nav" onclick="nextMonth()">次月 →</button>
                     </div>
                 </div>
-                <div id="monthYear" style="text-align: center; font-weight: 600; margin-bottom: 20px;"></div>
+                <div id="monthYear" style="text-align: center; font-weight: 700; margin-bottom: 20px; font-size: 18px; color: var(--primary);"></div>
                 <div class="weekdays">
                     <div class="weekday">日</div>
                     <div class="weekday">月</div>
@@ -445,30 +587,30 @@
             </div>
         </div>
 
-        <!-- タブ3 -->
+        <!-- タブ3: 統計 -->
         <div class="tab-content">
             <div class="card">
-                <h2>📈 ストリーク</h2>
+                <h2>🔥 ストリーク</h2>
                 <div style="text-align: center; padding: 20px;">
-                    <div style="font-size: 48px; color: #7ea8a8;" id="streak">0</div>
-                    <div style="font-size: 14px; color: #666;" id="streakText">日連続</div>
+                    <div style="font-size: 54px; color: var(--primary); font-weight: 800; line-height: 1;" id="streak">0</div>
+                    <div style="font-size: 15px; color: var(--text-muted); font-weight: 600; margin-top: 10px;" id="streakText">日連続</div>
                 </div>
             </div>
 
             <div class="card">
-                <h2>📊 統計</h2>
+                <h2>📊 総合統計</h2>
                 <div class="stat-grid">
                     <div class="stat-card">
                         <div class="stat-label">累計問題数</div>
                         <div class="stat-value" id="totalQ">0</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">累計時間</div>
+                        <div class="stat-label">累計学習時間</div>
                         <div class="stat-value" id="totalM">0</div>
-                        <div style="font-size: 12px; color: #666;">時間</div>
+                        <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;">時間</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">今月記録日数</div>
+                        <div class="stat-label">今月の記録日数</div>
                         <div class="stat-value" id="monthDays">0</div>
                     </div>
                     <div class="stat-card">
@@ -479,12 +621,13 @@
             </div>
 
             <div class="card">
-                <h2>🏆 バッジ</h2>
+                <h2>🏆 獲得バッジ</h2>
                 <div class="badges" id="badges"></div>
             </div>
         </div>
     </div>
 
+    <!-- モーダル (カレンダー詳細) -->
     <div id="modal" class="modal">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal()">✕</button>
@@ -511,8 +654,12 @@
         }
 
         function getTodayStr() {
+            // ローカルタイムゾーンでの現在日付を取得
             const d = new Date();
-            return d.toISOString().split('T')[0];
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
         }
 
         function showMsg(text) {
@@ -537,17 +684,17 @@
 
         function loadGoals() {
             const g = JSON.parse(localStorage.getItem('goals')) || {q: 0, m: 0};
-            document.getElementById('goalQ').value = g.q;
-            document.getElementById('goalM').value = g.m;
+            document.getElementById('goalQ').value = g.q || '';
+            document.getElementById('goalM').value = g.m || '';
         }
 
         function saveRecord() {
             const q = parseInt(document.getElementById('q').value) || 0;
             const m = parseInt(document.getElementById('m').value) || 0;
-            const memo = document.getElementById('memo').value;
+            const memoInput = document.getElementById('memo').value.trim();
             
             if (q === 0 && m === 0) {
-                showMsg('✗ 数値を入力してください');
+                showMsg('✗ 問題数または時間を入力してください');
                 return;
             }
             if (currentCondition === null) {
@@ -555,16 +702,50 @@
                 return;
             }
             
-            const record = {q, m, condition: currentCondition, memo, time: new Date().toISOString()};
-            localStorage.setItem('record_' + getTodayStr(), JSON.stringify(record));
-            showMsg('✓ 記録しました！');
+            const dateStr = getTodayStr();
+            const existingDataStr = localStorage.getItem('record_' + dateStr);
+            let recordToSave;
+
+            if (existingDataStr) {
+                // 既存の記録がある場合（積み上げ処理）
+                const existing = JSON.parse(existingDataStr);
+                
+                let newMemo = existing.memo || '';
+                if (memoInput) {
+                    // すでにメモがある場合は改行して追記
+                    newMemo = newMemo ? newMemo + '\n[追記] ' + memoInput : memoInput;
+                }
+
+                recordToSave = {
+                    q: existing.q + q,
+                    m: existing.m + m,
+                    condition: currentCondition, // コンディションは最新のものを適用
+                    memo: newMemo,
+                    time: new Date().toISOString()
+                };
+                showMsg('✓ 今日の記録に追加（積み上げ）しました！');
+            } else {
+                // 初回記録の場合
+                recordToSave = {
+                    q: q, 
+                    m: m, 
+                    condition: currentCondition, 
+                    memo: memoInput, 
+                    time: new Date().toISOString()
+                };
+                showMsg('✓ 記録しました！');
+            }
             
+            localStorage.setItem('record_' + dateStr, JSON.stringify(recordToSave));
+            
+            // 入力欄のリセット
             document.getElementById('q').value = '';
             document.getElementById('m').value = '';
             document.getElementById('memo').value = '';
             currentCondition = null;
             document.querySelectorAll('.condition-btn').forEach(b => b.classList.remove('selected'));
             
+            // 状態の更新
             renderCalendar();
             updateStats();
         }
@@ -581,12 +762,14 @@
             const grid = document.getElementById('calGrid');
             grid.innerHTML = '';
             
+            // 前月の空白
             for (let i = 0; i < startDay; i++) {
                 const div = document.createElement('div');
                 div.className = 'day other';
                 grid.appendChild(div);
             }
             
+            // 日付
             for (let day = 1; day <= daysInMonth; day++) {
                 const div = document.createElement('div');
                 div.className = 'day';
@@ -604,6 +787,7 @@
                 grid.appendChild(div);
             }
             
+            // 翌月の空白（レイアウト調整）
             const remaining = 42 - grid.children.length;
             for (let i = 1; i <= remaining; i++) {
                 const div = document.createElement('div');
@@ -628,18 +812,35 @@
             const [y, m, d] = dateStr.split('-');
             const date = new Date(y, m-1, d);
             const dayName = ['日','月','火','水','木','金','土'][date.getDay()];
+            
             document.getElementById('modalDate').textContent = `${y}年${m}月${d}日（${dayName}）`;
+            
+            const emojis = ['','😢','😐','😊','😄','🤩'];
+            
             document.getElementById('modalBody').innerHTML = `
-                <p><strong>問題数：</strong>${record.q}問</p>
-                <p><strong>時間：</strong>${record.m}分</p>
-                <p><strong>コンディション：</strong>${['','😢','😐','😊','😄','🤩'][record.condition]} ${record.condition}/5</p>
-                ${record.memo ? `<p><strong>メモ：</strong>${record.memo}</p>` : ''}
+                <p><strong>📝 解決した問題：</strong> ${record.q} 問</p>
+                <p><strong>⏱️ 学習時間：</strong> ${record.m} 分</p>
+                <p><strong>✨ コンディション：</strong> ${emojis[record.condition]} (Lv.${record.condition})</p>
+                ${record.memo ? `
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+                        <strong style="display:block; margin-bottom: 5px;">📓 メモ：</strong>
+                        <div style="white-space: pre-wrap; font-size: 14px; color: var(--text-muted); background: var(--bg-color); padding: 12px; border-radius: 8px;">${record.memo}</div>
+                    </div>
+                ` : ''}
             `;
             document.getElementById('modal').classList.add('show');
         }
 
         function closeModal() {
             document.getElementById('modal').classList.remove('show');
+        }
+
+        // モーダルの外側クリックで閉じる処理
+        window.onclick = function(event) {
+            const modal = document.getElementById('modal');
+            if (event.target == modal) {
+                closeModal();
+            }
         }
 
         function updateStats() {
@@ -667,36 +868,104 @@
             document.getElementById('monthDays').textContent = monthDays;
             document.getElementById('avgCond').textContent = count > 0 ? (totalCond / count).toFixed(1) : '-';
             
-            updateStreak();
-            updateBadges(totalQ, totalM);
+            const currentStreak = calculateStreak();
+            updateStreakDisplay(currentStreak);
+            updateTreeDisplay(currentStreak);
+            updateBadges(totalQ, totalM, currentStreak);
         }
 
-        function updateStreak() {
+        function calculateStreak() {
             let streak = 0;
             let d = new Date();
-            d.setHours(0,0,0,0);
             
+            // 過去に遡って連続記録をチェック
             while (true) {
-                const dateStr = d.toISOString().split('T')[0];
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                const dateStr = `${year}-${month}-${day}`;
+                
                 if (localStorage.getItem('record_' + dateStr)) {
                     streak++;
                     d.setDate(d.getDate() - 1);
                 } else {
+                    // 今日の記録がまだ無い場合は、昨日の記録からチェックを続行するか判断
+                    if (streak === 0) {
+                        d.setDate(d.getDate() - 1);
+                        const yYear = d.getFullYear();
+                        const yMonth = String(d.getMonth() + 1).padStart(2, '0');
+                        const yDay = String(d.getDate()).padStart(2, '0');
+                        const yDateStr = `${yYear}-${yMonth}-${yDay}`;
+                        
+                        if(localStorage.getItem('record_' + yDateStr)){
+                            // 昨日の記録があればストリーク継続中としてカウント開始
+                        } else {
+                            break; // 昨日も記録がなければストリーク0
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
+            return streak;
+        }
+
+        function updateStreakDisplay(streak) {
+            document.getElementById('streak').textContent = streak;
+            document.getElementById('streakText').textContent = streak > 0 ? `${streak}日連続！` : 'さあ、始めましょう';
+        }
+
+        function updateTreeDisplay(streak) {
+            // 成長の段階定義
+            const stages = [
+                { min: 0, max: 0, emoji: '🟫', name: '種まき待ち', desc: '記録すると種が蒔かれます' },
+                { min: 1, max: 2, emoji: '🌱', name: '双葉', desc: '可愛い芽が出ました！' },
+                { min: 3, max: 6, emoji: '🌿', name: '若葉', desc: '葉っぱが増えてきました' },
+                { min: 7, max: 14, emoji: '🪴', name: '苗木', desc: 'しっかりとした苗に成長' },
+                { min: 15, max: 29, emoji: '🌲', name: '若木', desc: '空に向かって伸びています' },
+                { min: 30, max: Infinity, emoji: '🌳', name: '大木', desc: '立派な大木になりました！' }
+            ];
+
+            // 現在のステージを判定
+            let stage = stages[0];
+            for (let s of stages) {
+                if (streak >= s.min && streak <= s.max) {
+                    stage = s;
                     break;
                 }
             }
+
+            document.getElementById('treeEmoji').textContent = stage.emoji;
             
-            document.getElementById('streak').textContent = streak;
-            document.getElementById('streakText').textContent = streak > 0 ? `${streak}日連続！` : 'まだ記録なし';
+            if (streak === 0) {
+                document.getElementById('treeStatus').textContent = stage.desc;
+                document.getElementById('treeProgress').style.width = '0%';
+                document.getElementById('treeNext').textContent = '今日の記録をつけて種を蒔こう';
+            } else {
+                document.getElementById('treeStatus').textContent = `${streak}日目：${stage.name} (${stage.desc})`;
+                
+                if (stage.max === Infinity) {
+                    document.getElementById('treeProgress').style.width = '100%';
+                    document.getElementById('treeNext').textContent = 'MAXレベル！この森を守り続けよう';
+                } else {
+                    const daysInStage = stage.max - stage.min + 1;
+                    const progress = streak - stage.min + 1;
+                    const percentage = (progress / daysInStage) * 100;
+                    const daysToNext = stage.max - streak + 1;
+                    
+                    document.getElementById('treeProgress').style.width = `${percentage}%`;
+                    document.getElementById('treeNext').textContent = `次の成長（${stages[stages.indexOf(stage) + 1].name}）まであと ${daysToNext} 日`;
+                }
+            }
         }
 
-        function updateBadges(totalQ, totalM) {
+        function updateBadges(totalQ, totalM, streakNum) {
             const badges = [
-                {icon: '🎯', name: '初記録', check: totalQ > 0},
-                {icon: '🔥', name: '7日連続', check: parseInt(document.getElementById('streak').textContent) >= 7},
-                {icon: '⭐', name: '30日連続', check: parseInt(document.getElementById('streak').textContent) >= 30},
-                {icon: '💯', name: '100問', check: totalQ >= 100},
-                {icon: '⏰', name: '10時間', check: (totalM / 60) >= 10}
+                {icon: '🌱', name: 'はじまりの種', check: totalQ > 0},
+                {icon: '🌿', name: '7日連続', check: streakNum >= 7},
+                {icon: '🌳', name: '30日連続', check: streakNum >= 30},
+                {icon: '🦋', name: '100問達成', check: totalQ >= 100},
+                {icon: '🦉', name: '10時間学習', check: (totalM / 60) >= 10}
             ];
             
             const html = badges.map(b => `
