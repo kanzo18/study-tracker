@@ -422,6 +422,74 @@
         .chat-send-btn:hover { background: var(--primary-hover); transform: translateY(-1px); }
         .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
+        /* コピペ連携 */
+        .relay-step {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .relay-step-header {
+            display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+        }
+        .relay-num {
+            width: 26px; height: 26px; background: var(--primary); color: #fff;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 800; flex-shrink: 0;
+        }
+        .relay-step-title { font-weight: 700; font-size: 14px; color: var(--text-main); }
+        .relay-textarea {
+            width: 100%; padding: 12px 14px; border: 1px solid var(--border-color);
+            border-radius: 12px; font-size: 14px; font-family: inherit;
+            background: #fff; color: var(--text-main); resize: vertical; min-height: 80px; line-height: 1.6;
+        }
+        .relay-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+        .relay-output {
+            width: 100%; padding: 12px 14px; border: 1.5px solid var(--accent);
+            border-radius: 12px; font-size: 13px; font-family: inherit;
+            background: #f0f7f2; color: var(--text-main); resize: vertical; min-height: 160px; line-height: 1.7;
+        }
+        .relay-log-item { padding: 12px 14px; background: #fff; border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 8px; font-size: 13px; }
+        .relay-log-time { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
+        .relay-log-reply { color: var(--text-main); line-height: 1.6; white-space: pre-wrap; }
+
+        /* コーピングサジェスト */
+        .coping-suggest-card {
+            background: linear-gradient(135deg, #fff9e6, #fffdf5);
+            border: 2px solid var(--warning);
+            border-radius: 18px;
+            padding: 18px 20px;
+            margin-bottom: 20px;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        .coping-suggest-card.show { display: block; }
+        .coping-suggest-label {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--warning);
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .coping-suggest-item {
+            background: #fff;
+            border: 1px solid #f0d89a;
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .coping-suggest-item:last-child { margin-bottom: 0; }
+        .coping-suggest-item:hover { border-color: var(--warning); background: #fffbee; transform: translateX(3px); }
+        .coping-suggest-cond { font-size: 11px; font-weight: 700; color: var(--warning); margin-bottom: 3px; }
+        .coping-suggest-rule { font-size: 14px; font-weight: 700; color: var(--text-main); line-height: 1.5; }
+        .coping-suggest-tap { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
         /* コーピングルール一覧 */
         .coping-rule {
             padding: 14px 16px;
@@ -669,6 +737,12 @@
             <button class="btn" onclick="addStep()">一歩を追加する</button>
         </div>
 
+        <!-- コーピングサジェスト -->
+        <div id="copingSuggestCard" class="coping-suggest-card">
+            <div class="coping-suggest-label">💡 今日使えそうなルール</div>
+            <div id="copingSuggestList"></div>
+        </div>
+
         <!-- 今日の一歩リスト -->
         <div class="card">
             <h2>📋 今日の一歩リスト</h2>
@@ -699,17 +773,49 @@
             <button class="btn" onclick="saveResult()">振り返りを保存</button>
         </div>
 
-        <!-- Claudeとの対話 -->
+        <!-- Claudeとの対話（コピペ連携） -->
         <div class="card">
             <h2>💬 Claudeと一緒に振り返る</h2>
-            <div class="info-badge">うまくいかなかった日も、パターンを一緒に考えよう</div>
-            <div class="chat-container">
-                <div class="chat-messages" id="chatMessages"></div>
-                <div class="chat-input-row">
-                    <textarea class="chat-input" id="chatInput" placeholder="今日のことを話してみよう…" rows="1"
-                        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"></textarea>
-                    <button class="chat-send-btn" id="chatSendBtn" onclick="sendChat()">↑</button>
+            <div class="info-badge">プロンプトを生成 → このチャットに貼り付け → 返答を記録</div>
+
+            <!-- STEP1 -->
+            <div class="relay-step">
+                <div class="relay-step-header">
+                    <span class="relay-num">1</span>
+                    <span class="relay-step-title">一言メモを追加（任意）</span>
                 </div>
+                <textarea id="relayUserNote" class="relay-textarea" placeholder="今日感じたこと、困ったことなど…（なくてもOK）"></textarea>
+            </div>
+
+            <!-- STEP2 -->
+            <div class="relay-step">
+                <div class="relay-step-header">
+                    <span class="relay-num">2</span>
+                    <span class="relay-step-title">プロンプトを生成してコピー</span>
+                </div>
+                <button class="btn" onclick="generatePrompt()" style="margin-bottom:10px;">📋 プロンプトを生成する</button>
+                <div id="relayPromptBox" style="display:none;">
+                    <textarea id="relayPromptText" class="relay-output" readonly></textarea>
+                    <button class="btn btn-secondary" onclick="copyPrompt()" style="margin-top:8px;" id="copyBtn">コピーする</button>
+                    <div id="copyDone" style="display:none;text-align:center;color:var(--primary);font-weight:700;font-size:13px;margin-top:6px;">✓ コピーしました！このチャットに貼り付けてください</div>
+                </div>
+            </div>
+
+            <!-- STEP3 -->
+            <div class="relay-step">
+                <div class="relay-step-header">
+                    <span class="relay-num">3</span>
+                    <span class="relay-step-title">Claudeの返答を貼り付けて保存</span>
+                </div>
+                <textarea id="relayReplyText" class="relay-textarea" placeholder="Claudeの返答をここに貼り付けてください…"></textarea>
+                <button class="btn" onclick="saveReply()" style="margin-top:8px;">返答を記録する</button>
+                <div id="relaySaved" style="display:none;margin-top:8px;padding:12px;background:var(--primary-light);border-radius:10px;font-size:13px;color:var(--primary);font-weight:600;"></div>
+            </div>
+
+            <!-- 過去の振り返りログ -->
+            <div id="relayLogSection" style="margin-top:20px;display:none;">
+                <div style="font-size:13px;font-weight:700;color:var(--text-muted);margin-bottom:10px;">📝 振り返りログ（今日）</div>
+                <div id="relayLog"></div>
             </div>
         </div>
 
@@ -793,12 +899,12 @@
 <script>
 // ===== 定数 =====
 const ROUTINES = [
-    { id: 'futon', emoji: '🛏️', label: 'アロマストーン' },
-    { id: 'desk_yt', emoji: '📺', label: '机でYouTubeを5分見た' },
-    { id: 'paper', emoji: '📝', label: '紙に一歩を書いた' },
-    { id: 'tools_on_bed', emoji: '📚', label: 'forestアプリ:環境音、ポモドーロ・テクニック' },
+    { id: 'futon', emoji: '🏺🕯️🌿 ', label: 'アロマストーン' },
+    { id: 'desk_yt', emoji: '📺', label: '机でYouTube5分見た' },
+    { id: 'paper', emoji: '🌲', label: 'forest記録' },
+    { id: 'tools_on_bed', emoji: '📚', label: 'ベッドに勉強道具を置いた' },
     { id: 'dishes', emoji: '🍽️', label: '食器の整理をした' },
-    { id: 'timer', emoji: '⏱️', label: '詰将棋' },
+    { id: 'timer', emoji: '☗☖', label: '将棋' },
 ];
 const FATIGUE_LABELS = ['','元気','やや元気','普通','やや疲れ','ヘトヘト'];
 
@@ -807,7 +913,6 @@ let currentCondition = null;
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
 let currentResult = null;
-let chatHistory = [];
 
 // ===== ユーティリティ =====
 function getTodayStr() {
@@ -840,7 +945,7 @@ function switchTab(n) {
     document.querySelectorAll('.tab-btn')[n].classList.add('active');
     if (n===3) renderCalendar();
     if (n===4) updateStats();
-    if (n===1) { renderStepList(); renderRoutineList(); renderCarryOver(); }
+    if (n===1) { renderStepList(); renderRoutineList(); renderCarryOver(); renderCopingSuggest(); }
     if (n===2) { renderCopingRules(); initChat(); loadResult(); }
 }
 
@@ -1073,133 +1178,288 @@ function saveResult() {
     renderCalendar();
 }
 
-// ===== チャット =====
-function buildSystemPrompt() {
+// ===== コピペ連携 =====
+// ===== 切り口の自動判定 (D) =====
+function detectAngle(result, steps, fatigue, sleep, userNote, history) {
+    const failed   = result?.result === 'fail';
+    const success  = result?.result === 'success';
+    const tired    = parseInt(fatigue) >= 4;
+    const sleepLow = parseInt(sleep)   <= 5;
+    const noSteps  = steps.length === 0;
+    const allDone  = steps.length > 0 && steps.every(s => s.done);
+    const partDone = steps.length > 0 && steps.some(s => s.done) && !allDone;
+    const noteDrift = userNote && /将棋|ゲーム|YouTube|SNS|スマホ|ぼーっと|別のこと|夢中/.test(userNote);
+    const noteDesk  = userNote && /机|向かえた|座れた|開けた/.test(userNote);
+
+    // 連続失敗パターン
+    const recentFails = history.filter(h => h.result === 'fail').length;
+    const streak3fail = recentFails >= 3;
+
+    // --- 切り口を決める ---
+    if (success && allDone) return {
+        angle: '成功パターンの言語化',
+        focus: `今日はうまくいきました。何がよかったのかを一緒に言語化して、再現できる形にしましょう。`,
+        question: `今日うまくいった要因を3つ以内で挙げ、「この条件が揃えば再現できる」という一文にまとめてください。`,
+        output: `明日も同じ流れを作るための「再現ルール」を1つ提案してください。`
+    };
+    if (noteDesk && failed) return {
+        angle: '机には向かえた×結果が出なかった',
+        focus: `机には向かえているのに勉強に入れなかった日です。「座る」と「始める」の間に何があるかを探ります。`,
+        question: `机に座ってから勉強を始めるまでの間に何が起きているか分析し、その"隙間"を埋める具体的な行動を考えてください。`,
+        output: `「机に座った直後の最初の5秒でやること」を1つだけ提案してください。`
+    };
+    if (noteDrift) return {
+        angle: '代替行動への流れ',
+        focus: `別のことに夢中になってしまったパターンです。「流れた」のではなく「別の集中先を選んだ」と捉えて、その集中力を勉強に向ける仕組みを考えます。`,
+        question: `夢中になったものの特徴（手軽さ・即時報酬・操作感など）を分析し、同じ特徴を勉強の"入口"に組み込む方法を考えてください。`,
+        output: `「〇〇に入りそうになったら、まず△△を1問だけやる」という形の具体的なif-thenルールを1つ提案してください。`
+    };
+    if (tired || sleepLow) return {
+        angle: '疲れ×勉強の両立',
+        focus: `疲れている状態での勉強です。無理に集中しようとせず、疲れているときでも続けられる"最小の一歩"を探します。`,
+        question: `疲労度${fatigue}/5・睡眠${sleep}時間という状態で、今日の行動パターンを評価してください。疲れているときに有効なコーピングと、やってはいけないことを整理してください。`,
+        output: `疲れた日でも「これならできる」という超低ハードルの勉強開始ルールを1つ提案してください。`
+    };
+    if (streak3fail) return {
+        angle: '連続失敗からの立て直し',
+        focus: `最近うまくいかない日が続いています。責めるのではなく、パターンを見つけて仕組みを変えることに集中します。`,
+        question: `過去の履歴を見て、失敗が続く日に共通している条件を推測してください。環境・時間帯・体調・前後の行動の観点から分析してください。`,
+        output: `今の仕組みのどこを1つ変えると流れが変わるか、最も効果が高そうな修正案を1つ提案してください。`
+    };
+    if (partDone) return {
+        angle: '部分達成の深掘り',
+        focus: `一歩を一部達成できました。できた部分とできなかった部分の違いを分析します。`,
+        question: `完了できた一歩とできなかった一歩の違いを比較し、「何があれば全部できたか」を具体的に考えてください。`,
+        output: `次回、全部完了するために変えるべき「たった1つのこと」を提案してください。`
+    };
+    if (noSteps && failed) return {
+        angle: '一歩を決めずに流れたパターン',
+        focus: `今日は「今日の一歩」を決めずにいたようです。決めていなかったことと、流れてしまったことの関係を考えます。`,
+        question: `「やること」を事前に決めていない状態がどう行動に影響したか考察してください。また、どのタイミングで一歩を決めると最も効果的かを分析してください。`,
+        output: `明日の「今日の一歩」を決めるベストなタイミングと、その決め方のコツを1つ提案してください。`
+    };
+    // デフォルト
+    return {
+        angle: '今日の振り返り',
+        focus: `今日の行動を振り返り、明日に活かせることを探します。`,
+        question: `今日の状況全体を見て、「うまくいった点」と「改善できる点」を1つずつ挙げてください。`,
+        output: `明日の夕食後に使える具体的なコーピングを1つ提案してください。`
+    };
+}
+
+function buildPrompt() {
     const today = getTodayStr();
     const steps = getTodaySteps();
     const result = JSON.parse(localStorage.getItem('result_'+today)||'null');
     const routines = getTodayRoutines();
     const usedRoutines = ROUTINES.filter(r=>routines[r.id]).map(r=>r.label);
-    const rules = JSON.parse(localStorage.getItem('copingRules')||'[]');
+    const rules  = JSON.parse(localStorage.getItem('copingRules')||'[]');
+    const userNote = document.getElementById('relayUserNote').value.trim();
+    const fatigue  = document.getElementById('fatigueRange').value;
+    const sleep    = document.getElementById('sleepRange').value;
+    const dinner   = document.getElementById('dinnerTime').value;
 
-    // 過去7日の履歴サマリー
+    // 過去7日履歴
+    const history = [];
     let historySummary = '';
     for (let i=1; i<=7; i++) {
         const d = new Date(); d.setDate(d.getDate()-i);
         const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
         const r = JSON.parse(localStorage.getItem('result_'+ds)||'null');
         const s = JSON.parse(localStorage.getItem('steps_'+ds)||'[]');
+        if (r) history.push({date:ds, result:r.result, memo:r.memo});
         if (r||s.length>0) {
-            historySummary += `\n- ${ds}: ${r?`結果=${r.result}(${r.memo||'メモなし'})`:'結果未記録'}, 一歩=${s.filter(x=>x.done).length}/${s.length}完了`;
+            historySummary += `\n  - ${ds}: ${r?(r.result==='success'?'✅うまくいった':'😓流れた')+'('+( r.memo||'メモなし')+')'  :'結果未記録'}, 一歩=${s.filter(x=>x.done).length}/${s.length}完了`;
         }
     }
+
+    const stepLines = steps.map(s=>`  - 「${s.task}」→ ${s.done?'✅完了'+(s.nextStep?' / 次: '+s.nextStep:''):'⬜未完了'}`).join('\n')||'  （未登録）';
+
+    // 切り口を自動判定 (D)
+    const angle = detectAngle(result, steps, fatigue, sleep, userNote, history);
 
     return `あなたは寛蔵さん専属の学習習慣コーチです。
 寛蔵さんは「気合いではなく仕組みで勉強に入れるようにしたい」と考えており、夕食後・休日食後のスムーズな勉強開始を目指しています。
 
-【今日の状況】
-- 今日の一歩: ${steps.map(s=>`「${s.task}」(${s.done?'完了':'未完了'})`).join(', ')||'未登録'}
-- 今日の結果: ${result?`${result.result==='success'?'うまくいった':'流れてしまった'} / ${result.memo||'メモなし'}`:'未記録'}
-- 使ったルーティン: ${usedRoutines.join(', ')||'なし'}
+━━━━━━━━━━━━━━━━━━━━
+【今日の切り口】▶ ${angle.angle}
+${angle.focus}
+━━━━━━━━━━━━━━━━━━━━
 
-【過去7日の履歴】${historySummary||'\nデータなし'}
+【今日（${today}）の状況】
+・今日の一歩:
+${stepLines}
+・今日の結果: ${result?(result.result==='success'?'✅うまくいった':'😓流れてしまった')+' / '+(result.memo||'メモなし'):'未記録'}
+・疲労度: ${FATIGUE_LABELS[fatigue]}（${fatigue}/5）、睡眠: ${sleep}時間${dinner?`、夕食時間: ${dinner}`:''}
+・使ったルーティン: ${usedRoutines.join(', ')||'なし'}
+${userNote?`・寛蔵さんのメモ: 「${userNote}」`:''}
+
+【過去7日の履歴】${historySummary||'\n  データなし'}
 
 【蓄積済みコーピングルール】
-${rules.map(r=>`- [${r.condition}] ${r.rule}`).join('\n')||'まだありません'}
+${rules.map(r=>`  - [${r.condition}] ${r.rule}`).join('\n')||'  まだありません'}
 
-【対話のスタンス】
-- 短く、温かく、具体的に話してください
-- うまくいかなかった日は責めず、「次に活かせること」を一緒に探してください
-- うまくいった日は「何がよかったか」を一緒に言語化してください
-- 会話の中で「この条件のときはこのパターン」というルールが見えてきたら、最後に必ず次のJSON形式で出力してください:
-  COPING_RULE:{"condition":"〇〇のとき","rule":"〇〇する"}
-- JSONはレスポンスの末尾に1つだけ出力してください。なければ出力不要です。`;
+━━━━━━━━━━━━━━━━━━━━
+【今日考えてほしいこと】
+${angle.question}
+
+【出力してほしいもの】(B)
+${angle.output}
+返答は200〜300字程度で、温かく、具体的に。責めずに寄り添う口調で。
+
+
+
+コーピングルールが導き出せたら返答の末尾に必ず以下の形式で1つだけ出力してください:
+COPING_RULE:{"condition":"〇〇のとき","rule":"〇〇する"}
+━━━━━━━━━━━━━━━━━━━━`;
 }
 
-function initChat() {
-    if (chatHistory.length > 0) return;
-    const today = getTodayStr();
-    const steps = getTodaySteps();
-    const result = JSON.parse(localStorage.getItem('result_'+today)||'null');
+function generatePrompt() {
+    const prompt = buildPrompt();
+    document.getElementById('relayPromptText').value = prompt;
+    document.getElementById('relayPromptBox').style.display = 'block';
+    document.getElementById('copyDone').style.display = 'none';
+}
 
-    let greeting = '今日はどんな一日でしたか？';
-    if (result) {
-        greeting = result.result==='success'
-            ? `今日はうまくいったんですね！何がよかったか、一緒に振り返りましょう 😊`
-            : `今日は流れてしまったんですね。大丈夫、次に活かしましょう。何があったか話してみてください。`;
-    } else if (steps.length > 0) {
-        const doneCount = steps.filter(s=>s.done).length;
-        greeting = `今日の一歩、${doneCount}/${steps.length}個完了ですね。どうでしたか？`;
+function copyPrompt() {
+    const text = document.getElementById('relayPromptText').value;
+    navigator.clipboard.writeText(text).then(()=>{
+        document.getElementById('copyDone').style.display = 'block';
+    }).catch(()=>{
+        document.getElementById('relayPromptText').select();
+        document.execCommand('copy');
+        document.getElementById('copyDone').style.display = 'block';
+    });
+}
+
+function saveReply() {
+    const reply = document.getElementById('relayReplyText').value.trim();
+    if (!reply) return;
+
+    // コーピングルール抽出
+    let savedRule = null;
+    const ruleMatch = reply.match(/COPING_RULE:(\{[^}]+\})/);
+    if (ruleMatch) {
+        try {
+            const rule = JSON.parse(ruleMatch[1]);
+            saveCopingRule(rule);
+            savedRule = rule;
+        } catch(e) {}
     }
 
-    addChatMsg('ai', greeting);
+    // ログ保存
+    const logs = JSON.parse(localStorage.getItem('relayLog_'+getTodayStr())||'[]');
+    logs.push({ time: new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}), reply });
+    localStorage.setItem('relayLog_'+getTodayStr(), JSON.stringify(logs));
+
+    const savedEl = document.getElementById('relaySaved');
+    savedEl.style.display = 'block';
+    savedEl.textContent = savedRule
+        ? `✓ 返答を記録しました！コーピングルール「${savedRule.condition}」も追加されました 📚`
+        : '✓ 返答を記録しました！';
+
+    document.getElementById('relayReplyText').value = '';
+    renderRelayLog();
+    renderCopingRules();
 }
 
-function addChatMsg(role, text) {
-    const msgs = document.getElementById('chatMessages');
-    const div = document.createElement('div');
-    div.className = `chat-msg ${role}`;
-    div.textContent = text;
-    msgs.appendChild(div);
-    msgs.scrollTop = msgs.scrollHeight;
-    if (role!=='loading') chatHistory.push({role: role==='ai'?'assistant':'user', content: text});
+function renderRelayLog() {
+    const logs = JSON.parse(localStorage.getItem('relayLog_'+getTodayStr())||'[]');
+    const section = document.getElementById('relayLogSection');
+    const logEl = document.getElementById('relayLog');
+    if (logs.length===0) { section.style.display='none'; return; }
+    section.style.display = 'block';
+    logEl.innerHTML = logs.slice().reverse().map(l=>`
+        <div class="relay-log-item">
+            <div class="relay-log-time">${l.time}</div>
+            <div class="relay-log-reply">${escHtml(l.reply.replace(/COPING_RULE:\{[^}]+\}/,'').trim())}</div>
+        </div>
+    `).join('');
 }
 
-async function sendChat() {
-    const input = document.getElementById('chatInput');
-    const text = input.value.trim();
-    if (!text) return;
-    input.value = '';
-    addChatMsg('user', text);
+function initChat() { renderRelayLog(); }
 
-    const sendBtn = document.getElementById('chatSendBtn');
-    sendBtn.disabled = true;
+// ===== コーピングサジェスト =====
+function renderCopingSuggest() {
+    const rules = JSON.parse(localStorage.getItem('copingRules') || '[]');
+    const card  = document.getElementById('copingSuggestCard');
+    const list  = document.getElementById('copingSuggestList');
+    if (!card || !list || rules.length === 0) { if(card) card.classList.remove('show'); return; }
 
-    // ローディング
-    const msgs = document.getElementById('chatMessages');
-    const loadingDiv = document.createElement('div');
-    loadingDiv.className = 'chat-msg ai loading';
-    loadingDiv.textContent = '考えています…';
-    msgs.appendChild(loadingDiv);
-    msgs.scrollTop = msgs.scrollHeight;
+    const fatigue   = parseInt(document.getElementById('fatigueRange')?.value || 3);
+    const sleepVal  = parseInt(document.getElementById('sleepRange')?.value   || 7);
+    const hour      = new Date().getHours();
+    const result    = JSON.parse(localStorage.getItem('result_' + getTodayStr()) || 'null');
 
-    try {
-        const messages = chatHistory.slice(0,-1).concat([{role:'user', content:text}]);
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model: 'claude-sonnet-4-20250514',
-                max_tokens: 1000,
-                system: buildSystemPrompt(),
-                messages
-            })
-        });
-        const data = await res.json();
-        loadingDiv.remove();
+    // スコアリング：条件テキストと現在状態の一致度を数値化
+    const scored = rules.map(r => {
+        const cond = r.condition;
+        let score = 0;
 
-        let reply = data.content?.find(c=>c.type==='text')?.text || '（応答を取得できませんでした）';
+        // 疲れ系キーワード
+        if (/疲れ|ヘトヘト|しんどい/.test(cond) && fatigue >= 4) score += 3;
+        if (/疲れ|ヘトヘト|しんどい/.test(cond) && fatigue <= 2) score -= 2;
 
-        // コーピングルール抽出
-        const ruleMatch = reply.match(/COPING_RULE:(\{[^}]+\})/);
-        if (ruleMatch) {
-            try {
-                const rule = JSON.parse(ruleMatch[1]);
-                saveCopingRule(rule);
-                reply = reply.replace(/COPING_RULE:\{[^}]+\}/, '').trim();
-                reply += '\n\n📚 新しいコーピングルールを追加しました！';
-            } catch(e) {}
-        }
+        // 睡眠系
+        if (/眠|睡眠不足/.test(cond) && sleepVal <= 5) score += 3;
 
-        addChatMsg('ai', reply);
-    } catch(e) {
-        loadingDiv.remove();
-        addChatMsg('ai', '通信エラーが発生しました。もう一度試してください。');
+        // 時間帯系
+        if (/夕食後|夜/.test(cond) && hour >= 18 && hour <= 23) score += 2;
+        if (/朝|午前/.test(cond) && hour >= 5  && hour <= 11)  score += 2;
+        if (/昼|午後/.test(cond) && hour >= 12 && hour <= 17)  score += 2;
+
+        // 代替行動系（将棋・ゲーム・YouTube）→ 常に有効
+        if (/将棋|ゲーム|YouTube|SNS|スマホ|別のこと/.test(cond)) score += 2;
+
+        // 失敗パターン
+        if (/流れ|できなかった|入れなかった/.test(cond) && result?.result === 'fail') score += 2;
+
+        // 連続失敗
+        const recentFails = [1,2,3].filter(i => {
+            const d = new Date(); d.setDate(d.getDate()-i);
+            const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            return JSON.parse(localStorage.getItem('result_'+ds)||'null')?.result === 'fail';
+        }).length;
+        if (/続いて|連続|パターン/.test(cond) && recentFails >= 2) score += 2;
+
+        // ベースライン：どのルールも最低1点（常にある程度表示候補にする）
+        score += 1;
+
+        return { ...r, score };
+    });
+
+    // スコア降順・上位3件を表示
+    const top = scored.sort((a,b) => b.score - a.score).slice(0, 3);
+    // スコアが1（ベースラインのみ）のものしかなければ「今日特に関係ない」として非表示
+    const hasRelevant = top.some(r => r.score > 1);
+    if (!hasRelevant) { card.classList.remove('show'); return; }
+
+    list.innerHTML = top
+        .filter(r => r.score > 1)
+        .map(r => `
+            <div class="coping-suggest-item" onclick="applySuggest(${JSON.stringify(r.rule).replace(/"/g,'&quot;')})">
+                <div class="coping-suggest-cond">📌 ${escHtml(r.condition)}</div>
+                <div class="coping-suggest-rule">${escHtml(r.rule)}</div>
+                <div class="coping-suggest-tap">タップして「今日の一歩」に反映 →</div>
+            </div>
+        `).join('');
+
+    card.classList.add('show');
+}
+
+function applySuggest(ruleText) {
+    // 「今日の一歩」入力欄にルール内容をセット
+    const taskInput = document.getElementById('stepTask');
+    if (taskInput) {
+        taskInput.value = ruleText;
+        taskInput.focus();
+        taskInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // 入力欄を一瞬ハイライト
+        taskInput.style.transition = 'box-shadow 0.3s';
+        taskInput.style.boxShadow = '0 0 0 4px rgba(224,160,64,0.3)';
+        setTimeout(() => { taskInput.style.boxShadow = ''; }, 1200);
     }
-    sendBtn.disabled = false;
 }
-
-// ===== コーピングルール =====
 function saveCopingRule(rule) {
     const rules = JSON.parse(localStorage.getItem('copingRules')||'[]');
     // 重複チェック（同じconditionは上書き）
@@ -1208,6 +1468,7 @@ function saveCopingRule(rule) {
     else rules.push(rule);
     localStorage.setItem('copingRules', JSON.stringify(rules));
     renderCopingRules();
+    renderCopingSuggest();
 }
 function renderCopingRules() {
     const rules = JSON.parse(localStorage.getItem('copingRules')||'[]');
